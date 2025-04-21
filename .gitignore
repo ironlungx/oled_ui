@@ -1,0 +1,6 @@
+.pio
+.aider*
+.clangd
+session.vim
+.cache
+compile_commands.json
