@@ -3,37 +3,10 @@
 #include <cstring>
 
 #include "appearance.h"
+#include "element.h"
 
 namespace UILib {
   long map(long x, long in_min, long in_max, long out_min, long out_max);
-
-  class Context {
-  public:
-    Context(U8G2 *u8g2) : u8g2(u8g2) {}
-    U8G2 *u8g2;
-  };
-
-  class Element {
-  public:
-    Element(int x, int y) : x_(x), y_(y) {}
-    Element() : x_(-1), y_(-1) {}
-
-    virtual ~Element() = default;
-
-    virtual void render(Context *ctx, Appearance *visuals) = 0;
-
-    virtual uint8_t getLength(Context *ctx) = 0;
-    virtual uint8_t getHeight(Context *ctx) = 0;
-
-    void setCoords(int x, int y) {
-      x_ = x;
-      y_ = y;
-    }
-
-  protected:
-    int x_, y_;
-    void drawBorder(Context *ctx, Appearance *visuals);
-  };
 
   class LabelSpec {
   public:
@@ -43,38 +16,40 @@ namespace UILib {
 
   template <size_t MaxSize> class Label : public Element {
   public:
-    Label(int x, int y, LabelSpec *spec, const char *initialText = "") : Element(x, y), _spec(spec) {
-      strncpy(_text, initialText, MaxSize - 1);
-      _text[MaxSize - 1] = '\0';
+    Label(int x, int y, LabelSpec *spec, const char *initialText = "") : Element(x, y), spec_(spec) {
+      strncpy(text_, initialText, MaxSize - 1);
+      text_[MaxSize - 1] = '\0';
     }
 
-    Label(const char *initialText = "") : Element() {
-      strncpy(_text, initialText, MaxSize - 1);
-      _text[MaxSize - 1] = '\0';
+    Label(int gridX, int gridY, GridAlignment hAlign, GridAlignment vAlign, LabelSpec *spec, const char *initialText = "")
+        : Element(gridX, gridY, hAlign, vAlign), spec_(spec) {
+
+      strncpy(text_, initialText, MaxSize - 1);
+      text_[MaxSize - 1] = '\0';
     }
 
     void render(Context *ctx, Appearance *visuals) override {
-      if (_spec && _spec->font) {
-        ctx->u8g2->setFont(_spec->font);
+      layout(ctx);
+      if (spec_ && spec_->font) {
+        ctx->u8g2->setFont(spec_->font);
       } else {
         ctx->u8g2->setFont(u8g2_font_haxrcorp4089_tr); // Fallback
       }
-      ctx->u8g2->drawStr(x_, y_, _text);
+      ctx->u8g2->drawStr(x_, y_, text_);
       drawBorder(ctx, visuals);
     }
 
     void setText(const char *newText) {
-      strncpy(_text, newText, MaxSize - 1);
-      _text[MaxSize - 1] = '\0';
+      strncpy(text_, newText, MaxSize - 1);
+      text_[MaxSize - 1] = '\0';
     }
 
-    uint8_t getLength(Context *ctx) override { return ctx->u8g2->getUTF8Width(_text); }
-
+    uint8_t getWidth(Context *ctx) override { return ctx->u8g2->getUTF8Width(text_); }
     uint8_t getHeight(Context *ctx) override { return ctx->u8g2->getMaxCharHeight(); }
 
   private:
-    char _text[MaxSize];
-    LabelSpec *_spec;
+    char text_[MaxSize];
+    LabelSpec *spec_;
   };
 
   class ProgressBar : public Element {
@@ -90,7 +65,7 @@ namespace UILib {
     void operator+=(int rhs) { setProgress(progress + rhs); }
     void operator-=(int rhs) { setProgress(progress - rhs); }
 
-    uint8_t getLength(Context *ctx) override { return maxWidth_; }
+    uint8_t getWidth(Context *ctx) override { return maxWidth_; }
     uint8_t getHeight(Context *ctx) override { return maxHeight_; }
 
   private:

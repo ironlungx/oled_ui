@@ -5,7 +5,7 @@ namespace UILib {
     if (!visuals || visuals->borderSize <= 0)
       return;
 
-    int length = getLength(ctx);
+    int length = getWidth(ctx);
     int height = getHeight(ctx);
 
     int x1 = x_ - visuals->paddingLeft;
@@ -48,10 +48,27 @@ namespace UILib {
   long map(long x, long in_min, long in_max, long out_min, long out_max) { return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min; }
 
   void ProgressBar::render(UILib::Context *ctx, Appearance *visuals) {
-    int barWidth = map(progress, 0, maxProgress_, 0, maxWidth_);
+    int innerMaxWidth = maxWidth_ - 2;
+    if (innerMaxWidth < 0)
+      innerMaxWidth = 0;
+
+    int innerBarWidth = map(progress, 0, maxProgress_, 0, innerMaxWidth);
+
+    if (innerBarWidth < 0)
+      innerBarWidth = 0;
 
     ctx->u8g2->drawFrame(x_, y_, maxWidth_, maxHeight_);
-    ctx->u8g2->drawBox(x_ + 1, y_ + 1, barWidth - 2, maxHeight_ - 2);
+    
+    if (innerBarWidth > 0) {
+      int innerHeight = maxHeight_ - 2;
+      if (innerHeight < 0)
+        innerHeight = 0;
+
+      if (innerHeight > 0) {
+        ctx->u8g2->drawBox(x_ + 1, y_ + 1, innerBarWidth, innerHeight);
+      }
+    }
+
     drawBorder(ctx, visuals);
   }
 
