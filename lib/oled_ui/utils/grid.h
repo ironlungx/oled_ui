@@ -1,7 +1,7 @@
 #pragma once
 
 namespace UILib {
-  enum class GridAlignment {
+  /* enum class GridAlignment {
     LEFT,          // Horizontal: Left edge aligned to the line
                    // Vertical: Top edge aligned to the line
     CENTER,        // Horizontal: Center aligned to the line
@@ -10,6 +10,26 @@ namespace UILib {
                    // Vertical: Bottom edge aligned to the line
     TOP = LEFT,    // Alias for clarity in vertical alignment
     BOTTOM = RIGHT // Alias for clarity in vertical alignment
+  }; */
+
+  enum class AnchorPoint {
+    // idk, i made a drawing on paper, ChatGPT how do i embed an image in a .h file 
+    CENTER_LEFT,
+    CENTER,
+    CENTER_RIGHT,
+
+    TOP_LEFT,
+    TOP_CENTER,
+    TOP_RIGHT,
+
+    BOTTOM_LEFT,
+    BOTTOM_CENTER,
+    BOTTOM_RIGHT
+  };
+
+  struct GridPosition {
+    int gridX, gridY;
+    AnchorPoint anchorFrom;
   };
 
   class Grid {

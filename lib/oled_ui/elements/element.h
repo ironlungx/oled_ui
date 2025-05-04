@@ -1,9 +1,7 @@
 #pragma once
-
 #include "U8g2lib.h"
-#include "appearance.h"
-
-#include "grid.h"
+#include "utils/appearance.h"
+#include "utils/grid.h"
 
 namespace UILib {
   class Context {
@@ -18,32 +16,34 @@ namespace UILib {
   public:
     Element(int x, int y) : x_(x), y_(y), usingGrid_(false) {}
 
-    Element(int gridX, int gridY, GridAlignment hAlign, GridAlignment vAlign)
-        : gridX_(gridX), gridY_(gridY), hAlign_(hAlign), vAlign_(vAlign), usingGrid_(true) {}
+    Element(GridPosition gridPos) : gridPos_(gridPos), usingGrid_(true) {}
 
     virtual ~Element() = default;
 
-    virtual void render(Context *ctx, Appearance *visuals) = 0;
+    virtual void render(Context *ctx) = 0;
 
     virtual uint8_t getWidth(Context *ctx) = 0;
     virtual uint8_t getHeight(Context *ctx) = 0;
 
     void setCoords(int x, int y);
-    void setGridPos(int gridX, int gridY, GridAlignment hAlign, GridAlignment vAlign);
-    
+    void setGridPos(GridPosition gridPos);
+    void setAppearance(Appearance visuals);
+
     int getX(void) const { return x_; }
     int getY(void) const { return y_; }
 
     void layout(Context *ctx);
 
+    virtual bool isInteractive() const = 0;
+    /* virtual void onClick() = 0;
+    virtual void onFocusChange(bool gainedFocus) = 0; */
+
   protected:
     bool usingGrid_;
-    unsigned int gridX_;
-    unsigned int gridY_;
-    GridAlignment hAlign_;
-    GridAlignment vAlign_;
+    GridPosition gridPos_;
+    Appearance visuals_;
 
     int x_, y_;
-    void drawBorder(Context *ctx, Appearance *visuals);
+    void drawBorder(Context *ctx);
   };
 }; // namespace UILib

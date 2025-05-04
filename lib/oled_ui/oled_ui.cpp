@@ -1,81 +1,8 @@
 #include "oled_ui.h"
 
 namespace UILib {
-  void Element::drawBorder(Context *ctx, Appearance *visuals) {
-    if (!visuals || visuals->borderSize <= 0)
-      return;
-
-    int length = getWidth(ctx);
-    int height = getHeight(ctx);
-
-    int x1 = x_ - visuals->paddingLeft;
-    int y1 = y_ - visuals->paddingTop;
-    int x2 = x1 + visuals->paddingLeft + length + visuals->paddingRight - 1;
-    int y2 = y1 + visuals->paddingTop + height + visuals->paddingBottom - 1;
-
-    switch (visuals->borderType) {
-      case Appearance::BorderType::SOLID:
-        ctx->u8g2->drawFrame(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
-        break;
-      case Appearance::BorderType::DOTTED:
-        for (int i = 0; i < visuals->borderSize; ++i) {
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x1 + i, y1 + i, x2 - i, y1 + i,
-                         2); // Top
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x1 + i, y2 - i, x2 - i, y2 - i,
-                         2); // Bottom
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x1 + i, y1 + 1 + i, x1 + i, y2 - 1 - i,
-                         2); // Left
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x2 - i, y1 + 1 + i, x2 - i, y2 - 1 - i,
-                         2); // Right
-        }
-        break;
-      case Appearance::BorderType::DASHED:
-        int dashFactor = 4; // Adjust for dash length and spacing
-        for (int i = 0; i < visuals->borderSize; ++i) {
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x1 + i, y1 + i, x2 - i, y1 + i,
-                         dashFactor); // Top
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x1 + i, y2 - i, x2 - i, y2 - i,
-                         dashFactor); // Bottom
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x1 + i, y1 + 1 + i, x1 + i, y2 - 1 - i,
-                         dashFactor); // Left
-          u8g2_DrawDLine(ctx->u8g2->getU8g2(), x2 - i, y1 + 1 + i, x2 - i, y2 - 1 - i,
-                         dashFactor); // Right
-        }
-        break;
-    }
-  }
-
-  long map(long x, long in_min, long in_max, long out_min, long out_max) { return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min; }
-
-  void ProgressBar::render(UILib::Context *ctx, Appearance *visuals) {
-    int innerMaxWidth = maxWidth_ - 2;
-    if (innerMaxWidth < 0)
-      innerMaxWidth = 0;
-
-    int innerBarWidth = map(progress, 0, maxProgress_, 0, innerMaxWidth);
-
-    if (innerBarWidth < 0)
-      innerBarWidth = 0;
-
-    ctx->u8g2->drawFrame(x_, y_, maxWidth_, maxHeight_);
-    
-    if (innerBarWidth > 0) {
-      int innerHeight = maxHeight_ - 2;
-      if (innerHeight < 0)
-        innerHeight = 0;
-
-      if (innerHeight > 0) {
-        ctx->u8g2->drawBox(x_ + 1, y_ + 1, innerBarWidth, innerHeight);
-      }
-    }
-
-    drawBorder(ctx, visuals);
-  }
-
-  void ProgressBar::setProgress(int progress) {
-    if (progress >= 0 && progress <= maxProgress_) {
-      this->progress = progress;
-    }
+  long map(long x, long in_min, long in_max, long out_min, long out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
 
   void u8g2_DrawDLine(u8g2_t *u8g2, u8g2_uint_t x1, u8g2_uint_t y1, u8g2_uint_t x2, u8g2_uint_t y2, u8g2_int_t d) {
